@@ -4,7 +4,7 @@ const config = require('./config.json');
 const commands = require('./commands.json');
 
 bot.on('message', message => {
-
+    if(message.channel.type === 'dm') return message.reply('Você só pode utilizar comandos em servidores!');
     if(message.author.bot) return;
 
     responseObject = commands
