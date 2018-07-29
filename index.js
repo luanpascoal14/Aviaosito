@@ -18,18 +18,20 @@ bot.on('message', message => {
 
     if(comando === 'serverinfo'){
         
+        let SIcon = message.guild.displayIconURL;
         let server = message.guild.name;
         var ServerInfoEmbed = new Discord.RichEmbed()
         .setColor('#00ff15')
+        .setThumbnail(SIcon)
         .setDescription('**Servidor**: **' + server + '**')
-        .addField('**Server ID**' + message.guild.id)
-        .addField('**Dono**: ' + message.guild.owner)
-        .addField('**Região**: ' + message.guild.region)
-        .addField('**Criado em**: ' + message.guild.createdAt)
-        .addField('**Canais(' + message.guild.channels.size + ")**")
-        .addField('**Tags(' + message.guild.roles.size + ')**')
-        .addField('**Emojis(' + message.guild.emojis.size + ')**')
-        .addField('**Membros(' + message.guild.memberCount + ')**');
+        .addField('**Server ID**', message.guild.id)
+        .addField('**Dono**: ', message.guild.owner)
+        .addField('**Região**: ', message.guild.region)
+        .addField('**Criado em**: ', message.guild.createdAt)
+        .addField('**Canais(', message.guild.channels.size + ")**")
+        .addField('**Tags(', message.guild.roles.size + ')**')
+        .addField('**Emojis(', message.guild.emojis.size + ')**')
+        .addField('**Membros(', message.guild.memberCount + ')**');
         
         message.reply(ServerInfoEmbed);
     }
