@@ -28,10 +28,10 @@ bot.on('message', message => {
         .addField('**Dono**: ', message.guild.owner)
         .addField('**Região**: ', message.guild.region)
         .addField('**Criado em**: ', message.guild.createdAt)
-        .addField('**Canais(', message.guild.channels.size + ")**")
-        .addField('**Tags(', message.guild.roles.size + ')**')
-        .addField('**Emojis(', message.guild.emojis.size + ')**')
-        .addField('**Membros(', message.guild.memberCount + ')**');
+        .addField('**Canais**:', message.guild.channels.size)
+        .addField('**Tags**', message.guild.roles.size)
+        .addField('**Emojis**', message.guild.emojis.size)
+        .addField('**Membros**', message.guild.memberCount);
         
         message.reply(ServerInfoEmbed);
     }
