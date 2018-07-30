@@ -21,8 +21,9 @@ bot.on('guildMemberRemove', member => {
 
 
 bot.on('message', message => {
-    if(message.channel.type === 'dm') return message.reply('Eu sou apenas um Bot, então use comandos em servidores');
     if(message.author.bot) return;
+    if(message.channel.type === 'dm') return message.reply('Eu sou apenas um Bot, então use comandos em servidores');
+    
 
     responseObject = commands
     if(responseObject[message.content]){
