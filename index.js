@@ -5,12 +5,17 @@ const commands = require('./commands.json');
 
 bot.on('guildMemberAdd', member => {
     if(member.guild.id === '437625052775710753') {
-        let canalSAI = member.guild.channels.get('452259852547522570');
-        canalSAI.send('👈 ' + member.user.username + ' você sempre será Bem Vindo ✔');
+        let canalBV = member.guild.channels.get('437662840980242432');
+        canalBV.send('Bem-Vindo, ' + member.user.username + ' ao grupo ŘΔƤØŞΔĆŘΔ₣Ŧ, chame seus amigos para se divertir!');
+        member.send('Obrigado por entrar no **' + member.guild.name + '** ' + member.user.username + '! Chame seus amigos para sé divertir com você! https://discord.gg/26MPNnh');
     }
 });
 
 bot.on('guildMemberRemove', member => {
+    if(member.guild.id === '437625052775710753') {
+        let canalSAI = member.guild.channels.get('452259852547522570');
+        canalSAI.send('👈 ' + member.user.username + ' você sempre será Bem Vindo ✔');
+    }
     if(member.guild.id === '437625052775710753') {
         let canalBV = member.guild.channels.get('437662840980242432');
         canalBV.send('Bem-Vindo, ' + member.user.username + ' ao grupo ŘΔƤØŞΔĆŘΔ₣Ŧ, chame seus amigos para se divertir!');
