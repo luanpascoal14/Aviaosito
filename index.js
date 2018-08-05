@@ -2,17 +2,17 @@ const Discord = require('discord.js');
 const bot = new Discord.Client();
 const config = require('./config.json');
 
-bot.on('guildMemberAdd', member => {
+bot.on('guildMemberRemove', member => {
     if(member.guild.id === '437625052775710753') {
         let canalSAI = member.guild.channels.get('452259852547522570');
-        canalSAI.send('👈 ' + member.user.username + ' você sempre será Bem Vindo ✔');
+        canalSAI.send('👈 ' + member.user.username + ' que pena que você saiu :cry:');
     }
 });
 
-bot.on('guildMemberRemove', member => {
+bot.on('guildMemberAdd', member => {
     if(member.guild.id === '437625052775710753') {
         let canalBV = member.guild.channels.get('437662840980242432');
-        canalBV.send('Bem-Vindo, ' + member.user.username + ' ao grupo ŘΔƤØŞΔĆŘΔ₣Ŧ, chame seus amigos para se divertir!');
+        canalBV.send('Bem-Vindo, ' + member.user + ' ao grupo ŘΔƤØŞΔĆŘΔ₣Ŧ, chame seus amigos para se divertir!');
         member.send('Obrigado por entrar no **' + member.guild.name + '** ' + member.user.username + '! Chame seus amigos para sé divertir com você! https://discord.gg/26MPNnh');
     }
 });
