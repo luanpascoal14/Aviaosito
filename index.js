@@ -124,12 +124,13 @@ bot.on('message', message => {
             .addField("**" + prefix + "falar**:", 'Quer se divertir? e talvez até enganar outras pessoas, pensando que o bot mesmo está falando? Então use')
             .addField("**" + prefix + "limpar**:", 'Comando para administrador seu servidor! Limpe mensagens com facilidade!')
             .addField("**" + prefix + "nick**:", 'Mude seu Apelido no servidor!')
+            .addField("**" + prefix + "pedido**:", 'Comando, para você dar ideias para mim :)')
             .addField("**" + prefix + "ping**:", 'Quer ver o seu ping? Então use esse comando ;-) !')
             .addField("**" + prefix + "reportar**:", 'Use esse comando para reportar mal comportamento de um membro para a staff!');
         
             
             message.author.send(AjudaEmbed);
-            message.reply('Enviei a ajuda em seu Privado!');
+            message.reply('Enviei a ajuda em seu Privado! ;)');
             
         }
     }
@@ -138,39 +139,36 @@ bot.on('message', message => {
             if(!msgs[0]) return message.reply('Você precisa dizer o seu novo nickname!');
             let Nnick = msgs.slice(22).join(" ");
             if(message.guild.owner.id === message.author.id) return message.reply('Desculpa, Mais não posso mudar seu nickname!');
-            message.delete();
+            message.delete().catch();
             message.member.setNickname(Nnick);
             message.reply('Agora seu novo nickname neste servidor é: **' + Nnick + '** !');
         }
     } 
-
+    if(message.content.startsWith(prefix + 'pedido')) {
+        if(comando === 'pedido'){
+            if(!msgs[0]) return message.reply('Você precisa anotar seu pedido!');
+            let PMsg = msgs.join(' ');
+            let PIcon = message.author.displayAvatarURL;
+            let PColor = message.member.displayColor;
+            let PEmbed = new Discord.RichEmbed()
+            .setThumbnail(PIcon)
+            .setColor(PColor)
+            .setDescription('**PEDIDO**', 'Por: ' + message.author.username)
+            .addField('Horario:', message.createdAt)
+            .addField('**Pedido:**', PMsg);
+            message.delete();
+            let PDono = message.guild.members.find('id', '364241967388950531');
+            message.author.send('**Pedido enviado para um de nossos desenvolvedores!**');
+            PDono.send(PEmbed);
+        }
+    }
 
     if(message.content.startsWith(prefix + 'falar')) {
         if(comando === 'falar'){
-            let saybotmessage = msgs.join(" ");
+            let saybotmessage = msgs.join(' ');
             if(!msgs[0]) return message.reply('Adicione alguma coisa para eu poder falar! ;)');
             message.delete().catch();
             message.channel.send(saybotmessage);
-        }
-    }
-    if(message.content.startsWith(prefix + 'pedido')) {
-        if(comando === 'pedido'){
-            let pedidoMessage = msgs.slice(22).join(" ");
-            if(!msgs[0]) return message.reply('Você precisa anotar seu pedido!');
-            let DonoAv = message.guild.members.find('id', '364241967388950531');
-            let PedEmbed = new Discord.RichEmbed()
-            .setThumbnail(message.author.displayAvatarURL)
-            .setColor(message.member.displayColor)
-            .setTitle('**PEDIDO**')
-            .setDescription('Por: ' + message.author.username, message.createdAt)
-            .addField('⠀', pedidoMessage);
-            message.delete();
-            DonoAv.send(PedEmbed);
-            message.author.send('Pedido enviado com sucesso para um de nossos Dev');
-
-            
-            
-            
         }
     }
     
