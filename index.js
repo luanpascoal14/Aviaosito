@@ -162,6 +162,23 @@ bot.on('message', message => {
             PDono.send(PEmbed);
         }
     }
+    if(message.content.startsWith(prefix + 'votar')) {
+        if(comando === 'votar'){
+            if(!message.member.hasPermission('MANAGE_GUILD')) return message.reply('Você precisa ter a permissão de gerenciar servidor para isso!');
+            if(!msgs[0]) return message.reply('Adicione o Conteudo!');
+            let VConteudo = msgs.join(' ');
+            let AnuncioEmbed0 = new Discord.RichEmbed()
+            .setDescription(`**Votação**`)
+            .setAuthor(`${message.author.username}`)
+            .setColor('#fffa00')
+            .addField(`**${VConteudo}**`, '====================')
+            .addField(`\:white_check_mark: Sim`, '\:negative_squared_cross_mark: Não');
+            message.channel.send(AnuncioEmbed0).then(m => {
+                m.react('❎').then(m.react('✅'))
+            });
+        }
+    }
+
 
     if(message.content.startsWith(prefix + 'falar')) {
         if(comando === 'falar'){
@@ -171,6 +188,7 @@ bot.on('message', message => {
             message.channel.send(saybotmessage);
         }
     }
+    
     
 });
 
