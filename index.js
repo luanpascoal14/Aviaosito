@@ -22,6 +22,7 @@ bot.on('guildMemberAdd', member => {
 bot.on('message', message => {
     if(message.author.bot) return;
     if(message.channel.type === 'dm') return message.reply('Eu sou apenas um Bot, então use comandos em servidores');
+    if(message.author.id === '349031913375137794') return message.reply('Desculpe! Aconteceu algum erro no meu sistema, então você não poderá utilizar esse comando!');
 
     const prefix = config.prefix;
     const msgs = message.content.slice(config.prefix.length).trim().split(/ +/g);
@@ -122,7 +123,6 @@ bot.on('message', message => {
             .addField("Comandos: ")
             .addField("**" + prefix + "avatar**:", 'Um comando para ver os avatares dos outros membros do servidor!')
             .addField("**" + prefix + "falar**:", 'Quer se divertir? e talvez até enganar outras pessoas, pensando que o bot mesmo está falando? Então use')
-            .addField("**" + prefix + "limpar**:", 'Comando para administrador seu servidor! Limpe mensagens com facilidade!')
             .addField("**" + prefix + "nick**:", 'Mude seu Apelido no servidor!')
             .addField("**" + prefix + "pedido**:", 'Comando, para você dar ideias para mim :)')
             .addField("**" + prefix + "ping**:", 'Quer ver o seu ping? Então use esse comando ;-) !')
@@ -197,4 +197,4 @@ bot.on('ready', () => {
     console.log('[Aviãosito] Iniciado !');
     bot.user.setActivity('av!ajuda', {type:'LISTENING'});
 });
-bot.login(process.env.BOT_TOKEN);
+bot.login(config.token);
