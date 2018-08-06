@@ -153,6 +153,27 @@ bot.on('message', message => {
             message.channel.send(saybotmessage);
         }
     }
+    if(message.content.startsWith(prefix + 'pedido')) {
+        if(comando === 'pedido'){
+            let pedidoMessage = msgs.slice(22).join(" ");
+            if(!msgs[0]) return message.reply('Você precisa anotar seu pedido!');
+            let DonoAv = message.guild.members.find('id', '364241967388950531');
+            let PedEmbed = new Discord.RichEmbed()
+            .setThumbnail(message.author.displayAvatarURL)
+            .setColor(message.member.displayColor)
+            .setTitle('**PEDIDO**')
+            .setDescription('Por: ' + message.author.username, message.createdAt)
+            .addField('⠀', pedidoMessage);
+            message.delete();
+            DonoAv.send(PedEmbed);
+            message.author.send('Pedido enviado com sucesso para um de nossos Dev');
+
+            
+            
+            
+        }
+    }
+    
 });
 
 bot.on('ready', () => {
