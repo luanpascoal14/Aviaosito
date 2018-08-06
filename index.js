@@ -126,7 +126,8 @@ bot.on('message', message => {
             .addField("**" + prefix + "nick**:", 'Mude seu Apelido no servidor!')
             .addField("**" + prefix + "pedido**:", 'Comando, para você dar ideias para mim :)')
             .addField("**" + prefix + "ping**:", 'Quer ver o seu ping? Então use esse comando ;-) !')
-            .addField("**" + prefix + "reportar**:", 'Use esse comando para reportar mal comportamento de um membro para a staff!');
+            .addField("**" + prefix + "reportar**:", 'Use esse comando para reportar mal comportamento de um membro para a staff!')
+            .addField("**" + prefix + "votar**:", 'Você quer perguntar as membros se Sim ou Não, esse é o melhor comando!');
         
             
             message.author.send(AjudaEmbed);
