@@ -28,23 +28,21 @@ bot.on('message', message => {
     const msgs = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const comando = msgs.shift().toLowerCase();
 
-    if(message.content.startsWith(prefix + 'serverinfo')) {
-        if(comando === 'serverinfo'){
+    if(message.content.startsWith(prefix + 'si')) {
+        if(comando === 'si'){
             
             let SIcon = message.guild.iconURL;
-            let server = message.guild.name;
-            var ServerInfoEmbed = new Discord.RichEmbed()
-            .setColor('#00ff15')
-            .setThumbnail(SIcon)
-            .setTitle('**Servidor**: **' + server + '**')
-            .addField('**Server ID:', message.guild.id)
-            .addField('**Região**:', message.guild.region)
-            .addField('**Dono**', message.guild.owner.user.username)
-            .addField('**Membros(' + message.guild.memberCount + ')**');
             
-            message.reply(ServerInfoEmbed);
+            let SEmbed = new Discord.RichEmbed()
+            .setThumbnail(SIcon)
+            .setColor('#72a8ff')
+            .setTitle('**' + message.channel.name + '**')
+            .setDescription('Informações:', '⠀')
+            .addField('Server ID: ' + message.guild.id, 'Dono: ' + message.guild.owner.nickname)
+            .addField('Membros: ' + message.guild.memberCount, 'Canais: ' + message.guild.channels.size);
         }
     }
+
     if(message.content.startsWith(prefix + 'ping')) {
         if(comando === 'ping'){
             var pingembed = new Discord.RichEmbed()
@@ -120,7 +118,7 @@ bot.on('message', message => {
             .setDescription("**AJUDA DO AVIÃOSITO!**")
             .setThumbnail(AIcon)
             .setColor("#00effc")
-            .addField("Comandos: ")
+            .addField("Comandos: ", '->')
             .addField("**" + prefix + "avatar**:", 'Um comando para ver os avatares dos outros membros do servidor!')
             .addField("**" + prefix + "falar**:", 'Quer se divertir? e talvez até enganar outras pessoas, pensando que o bot mesmo está falando? Então use')
             .addField("**" + prefix + "nick**:", 'Mude seu Apelido no servidor!')
@@ -180,6 +178,26 @@ bot.on('message', message => {
         }
     }
 
+    if(message.content.startsWith(prefix + 'botinfo')){
+        if(comando === 'botinfo'){
+            let BIcon = message.client.user.displayAvatarURL;
+            
+            let BEmbed = new Discord.RichEmbed()
+            .setThumbnail(BIcon)
+            .setColor(message.member.displayColor)
+            .setTitle('**INFORMAÇÕES DO BOT**')
+            .setDescription('Bot:', message.client.user.username)
+            .addField('Criador:', 'luanpascoal14#9606')
+            .addField('Servidor:', 'Casa do Aviãosito Bot => https://discord.gg/sJmTHc4')
+            .addField('Servidor Segundario:', 'RaposaCraft => https://discord.gg/MvQqxhy')
+            .addField('Usuarios: ' + message.client.users.size, 'Grupos: ' + message.client.guilds.size)
+            .addField('SubDono: ', '! 🔥RaposinhoGm__r🔥#3372');
+
+            message.author.send(BEmbed);
+            message.reply('Enviei minhas informações em seu privado !');
+            
+        }
+    }
 
     if(message.content.startsWith(prefix + 'falar')) {
         if(comando === 'falar'){
