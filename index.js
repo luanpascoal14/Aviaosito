@@ -22,7 +22,7 @@ bot.on('guildMemberAdd', member => {
 bot.on('message', message => {
     if(message.author.bot) return;
     if(message.channel.type === 'dm') return message.reply('Eu sou apenas um Bot, então use comandos em servidores');
-    if(message.author.id === '') return message.reply('Desculpe! Aconteceu algum erro no meu sistema, então você não poderá utilizar esse comando!');
+    if(message.a
 
     const prefix = config.prefix;
     const msgs = message.content.slice(config.prefix.length).trim().split(/ +/g);
