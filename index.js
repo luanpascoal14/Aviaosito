@@ -125,6 +125,7 @@ bot.on('message', message => {
                 msg.react('💿').then(r=>{
                     msg.react('🔙')
                 })
+                
             })
             const utilidadesfilter = (reaction, user) => reaction.emoji.name === '🗃' && user.id === message.author.id;
             const musicafilter = (reaction, user) => reaction.emoji.name === '💿' && user.id === message.author.id;
@@ -154,7 +155,6 @@ bot.on('message', message => {
                 .setColor('#ff0000')
                 .setThumbnail(message.client.user.displayAvatarURL)
                 .setDescription('**Musica**', 'Comandos:')
-                .addField('**INDISPONIVEL**', '==================')
                 .addField(prefix + 'lista', 'Mostrar a lista de comandos!')
                 .addField(prefix + 'parar', 'Faça o bot parar de tocar as musicas e limpar a lista!')
                 .addField(prefix + 'pular', 'Passe para o proxima musica da lista!')
@@ -246,6 +246,125 @@ bot.on('message', message => {
     
 });
 
+const ytdl = require('ytdl-core');
+const queue = new Map();
+
+bot.on('message', async message => {
+    if(message.author.bot) return;
+    const prefix = config.prefix;
+    if(!message.content.startsWith(prefix)) return;
+    const args = message.content.split(' ');
+    const serverQueue = queue.get(message.guild.id);
+
+    if(message.content.startsWith(prefix + 'tocar')){
+        const voiceChannel = message.member.voiceChannel;
+        if(!voiceChannel) return message.reply('Você precisa estar em um canal de voz!');
+        const permissions = voiceChannel.permissionsFor(message.client.user);
+        if(!permissions.has('CONNECT')) {
+            return message.reply('Eu não pude conectar em seu canal, pois preciso ter algumas permissões!');
+        }
+        if(!permissions.has('SPEAK')) {
+            return message.reply('Eu não posso falar, pois preciso ter algumas permissões!');
+        }
+
+        const songInfo = await ytdl.getInfo(args[1]);
+        const song = {
+            title: songInfo.title,
+            url: songInfo.video_url
+        };
+
+        if(!serverQueue) {
+            const queueConstruct = {
+                textChannel: message.channel,
+                voiceChannel: voiceChannel,
+                connection: null,
+                songs: [],
+                volume: 5,
+                playing: true
+            };
+            queue.set(message.guild.id, queueConstruct);
+
+            queueConstruct.songs.push(song);
+
+            try {
+                var connection = await voiceChannel.join();
+                queueConstruct.connection = connection;
+                play(message.guild, queueConstruct.songs[0]);
+            } catch (error) {
+                console.error('Tive um erro! ' + error);
+                queue.delete(message.guild.id);
+                return message.reply('Eu não pude conectar ao canal, pois tive alguns erros!');
+            }
+
+        } else {
+            serverQueue.songs.push(song);
+            return message.reply(`Adicionado para a lista: **${song.title}**`);
+        }
+        return;
+    } else if (message.content.startsWith(prefix + 'pular')) {
+        if(!message.member.voiceChannel) return message.reply('Você não está em um canal de voz!');
+        if (!serverQueue) return message.reply('Não está tocando nada!');
+        serverQueue.connection.dispatcher.end();
+        return;
+
+
+
+    } else if (message.content.startsWith(prefix + 'parar')){
+        if(!message.member.voiceChannel) return message.reply('Você não está em um canal de voz!');
+        if (!serverQueue) return message.reply('Não está tocando nada!');
+        serverQueue.songs = [];
+        serverQueue.connection.dispatcher.end();
+        return;
+
+
+
+    } else if(message.content.startsWith(prefix + 'volume')) {
+        if(!serverQueue) return message.reply('Não estou tocando nada!');
+        if(!args[1]) return message.reply(`O volume atual é: **${serverQueue.volume}**`);
+        serverQueue.connection.dispatcher.setVolumeLogarithmic(args[1] / 5);
+        return message.reply(`O volume atual agora é: **${args[1]}**`);
+
+
+
+    } else if (message.content.startsWith(prefix + 'tocando')) {
+        if(!serverQueue) return message.reply('Não estou tocando nada!');
+        return message.reply(`Estou Tocando: **${serverQueue.songs[0].title}**`);
+    
+    
+    } else if (message.content.startsWith(prefix + 'lista')) {
+        if (!serverQueue) return message.reply('Eu não estou tocando nada!');
+        return message.reply(`
+==**Lista**==
+${serverQueue.songs.map(song => `**-** ${song.title}`).join('\n')}
+
+**Tocando**: ${serverQueue.songs[0].title}
+        `);
+    }
+    return;
+
+});
+
+function play(guild, song) {
+    const serverQueue = queue.get(guild.id);
+
+    if(!song) {
+        serverQueue.voiceChannel.leave();
+        queue.delete(guild.id);
+        return;
+    }
+
+    const dispatcher = serverQueue.connection.playStream(ytdl(song.url))
+        .on('end', () => {
+            console.log('Musica acabou!');
+            serverQueue.songs.shift();
+            play(guild, serverQueue.songs[0]);
+        })
+        .on('error', error => console.error(error))
+    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+
+    serverQueue.textChannel.send(`Agora Tocando: **${song.title}**`);
+
+}
 
 
 bot.on('ready', () => {
