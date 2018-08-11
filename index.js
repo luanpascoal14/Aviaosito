@@ -370,4 +370,4 @@ bot.on('ready', () => {
     console.log('[Aviãosito] Iniciado !');
     bot.user.setActivity('av!ajuda', {type:'LISTENING'});
 });
-bot.login(config.token);
+bot.login(process.env.BOT_TOKEN);
