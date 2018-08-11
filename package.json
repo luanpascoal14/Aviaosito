@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "npm i opusscript ytdl-core"
+    "start": "node index.js"
   },
   "dependencies": {
     "discord.js": "^11.3.2"
