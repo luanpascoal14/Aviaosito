@@ -1,1 +1,1 @@
-worker: npm i opusscript ytdl-core
+worker: node index.js
