@@ -122,9 +122,9 @@ bot.on('message', message => {
         message.reply('Enviei minha lista, em seu privado :D!');
         message.author.send(AEmbed).then(msg=>{
             msg.react('🗃').then(r=>{
-                msg.react('💿')
-                msg.react('🔙')
-                
+                msg.react('💿').then(r=>{
+                    msg.react('🔙')
+                })
             })
             const utilidadesfilter = (reaction, user) => reaction.emoji.name === '🗃' && user.id === message.author.id;
             const musicafilter = (reaction, user) => reaction.emoji.name === '💿' && user.id === message.author.id;
