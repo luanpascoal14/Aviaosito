@@ -22,7 +22,6 @@ bot.on('guildMemberAdd', member => {
 bot.on('message', message => {
     if(message.author.bot) return;
     if(message.channel.type === 'dm') return message.reply('Eu sou apenas um Bot, então use comandos em servidores');
-    
 
     const prefix = config.prefix;
     const msgs = message.content.slice(config.prefix.length).trim().split(/ +/g);
@@ -111,28 +110,64 @@ bot.on('message', message => {
         }
     }
 
-    if(message.content.startsWith(prefix + 'ajuda')) {
-        if(comando === 'ajuda'){
-            let AIcon = message.author.displayAvatarURL;
-            let AjudaEmbed = new Discord.RichEmbed()
-            .setDescription("**AJUDA DO AVIÃOSITO!**")
-            .setThumbnail(AIcon)
-            .setColor("#00effc")
-            .addField("Comandos: ", '->')
-            .addField("**" + prefix + "avatar**:", 'Um comando para ver os avatares dos outros membros do servidor!')
-            .addField("**" + prefix + "falar**:", 'Quer se divertir? e talvez até enganar outras pessoas, pensando que o bot mesmo está falando? Então use')
-            .addField("**" + prefix + "nick**:", 'Mude seu Apelido no servidor!')
-            .addField("**" + prefix + "pedido**:", 'Comando, para você dar ideias para mim :)')
-            .addField("**" + prefix + "ping**:", 'Quer ver o seu ping? Então use esse comando ;-) !')
-            .addField("**" + prefix + "reportar**:", 'Use esse comando para reportar mal comportamento de um membro para a staff!')
-            .addField("**" + prefix + "votar**:", 'Você quer perguntar as membros se Sim ou Não, esse é o melhor comando!');
-        
-            
-            message.author.send(AjudaEmbed);
-            message.reply('Enviei a ajuda em seu Privado! ;)');
-            
-        }
+    if(message.content.startsWith (prefix + 'ajuda')){
+        let AEmbed = new Discord.RichEmbed()
+        .setTitle('**AJUDA**')
+        .setThumbnail(message.client.user.displayAvatarURL)
+        .setColor(message.member.displayColor)
+        .setDescription('**BOT**: ', '**Aviãosito**')
+        .addField('Para escolher uma categoria apenas clique no emoji correspondente!', 'Emojis:')
+        .addField('\:card_box:   **Utlidades**', '\:cd: **Musica**')
+        .addField('\:back: **Voltar**', '=========');
+        message.reply('Enviei minha lista, em seu privado :D!');
+        message.author.send(AEmbed).then(msg=>{
+            msg.react('🗃').then(r=>{
+                msg.react('💿')
+                msg.react('🔙')
+                
+            })
+            const utilidadesfilter = (reaction, user) => reaction.emoji.name === '🗃' && user.id === message.author.id;
+            const musicafilter = (reaction, user) => reaction.emoji.name === '💿' && user.id === message.author.id;
+            const voltarfilter = (reaction, user) => reaction.emoji.name === '🔙' && user.id === message.author.id;
+            const utilidades = msg.createReactionCollector(utilidadesfilter, { time: 60000 });
+            const musica = msg.createReactionCollector(musicafilter, { time: 60000 });
+            const voltar = msg.createReactionCollector(voltarfilter, { time: 60000 });
+            utilidades.on('collect', r => { 
+                let AEmbedUti = new Discord.RichEmbed()
+                .setTitle('**AJUDA**')
+                .setColor('#ff0000')
+                .setThumbnail(message.client.user.displayAvatarURL)
+                .setDescription('**Administração**', 'Comandos:')
+                .addField(prefix + "avatar", 'Um comando para ver os avatares dos outros membros do servidor!')
+                .addField(prefix + 'botinfo', 'Minhas Informações!')
+                .addField(prefix + "falar", 'Quer se divertir? e talvez até enganar outras pessoas, pensando que o bot mesmo está falando? Então use')
+                .addField(prefix + "nick", 'Mude seu Apelido no servidor!')
+                .addField(prefix + "pedido", 'Comando, para você dar ideias para mim :)')
+                .addField(prefix + "ping", 'Veja o seu ping!')
+                .addField(prefix + "reportar", 'Use esse comando para reportar mal comportamento de um membro para a staff!')
+                .addField(prefix + "votar", 'Você quer perguntar as membros se Sim ou Não, esse é o melhor comando!')
+                msg.edit(AEmbedUti);
+            })
+            musica.on('collect', r2 => { 
+                let AEmbedMus = new Discord.RichEmbed()
+                .setTitle('**AJUDA**')
+                .setColor('#ff0000')
+                .setThumbnail(message.client.user.displayAvatarURL)
+                .setDescription('**Musica**', 'Comandos:')
+                .addField(prefix + 'lista', 'Mostrar a lista de comandos!')
+                .addField(prefix + 'parar', 'Faça o bot parar de tocar as musicas e limpar a lista!')
+                .addField(prefix + 'pular', 'Passe para o proxima musica da lista!')
+                .addField(prefix + 'tocar', 'Toque a musica desejada, utilizando apenas o link!')
+                .addField(prefix + 'tocando', 'Mostre a musica atual, que está tocando!')
+                .addField(prefix + 'volume', 'Altere o Volume da musica!');
+                msg.edit(AEmbedMus);
+            })
+            voltar.on('collect', r3 => {
+                msg.edit(AEmbed);
+            })
+        })
     }
+
     if(message.content.startsWith(prefix + 'nick')) {
         if(comando === 'nick') {
             if(!msgs[0]) return message.reply('Você precisa dizer o seu novo nickname!');
@@ -177,7 +212,6 @@ bot.on('message', message => {
             });
         }
     }
-
     if(message.content.startsWith(prefix + 'botinfo')){
         if(comando === 'botinfo'){
             let BIcon = message.client.user.displayAvatarURL;
@@ -211,8 +245,129 @@ bot.on('message', message => {
     
 });
 
+const ytdl = require('ytdl-core');
+const queue = new Map();
+
+bot.on('message', async message => {
+    if(message.author.bot) return;
+    const prefix = config.prefix;
+    if(!message.content.startsWith(prefix)) return;
+    const args = message.content.split(' ');
+    const serverQueue = queue.get(message.guild.id);
+
+    if(message.content.startsWith(prefix + 'tocar')){
+        const voiceChannel = message.member.voiceChannel;
+        if(!voiceChannel) return message.reply('Você precisa estar em um canal de voz!');
+        const permissions = voiceChannel.permissionsFor(message.client.user);
+        if(!permissions.has('CONNECT')) {
+            return message.reply('Eu não pude conectar em seu canal, pois preciso ter algumas permissões!');
+        }
+        if(!permissions.has('SPEAK')) {
+            return message.reply('Eu não posso falar, pois preciso ter algumas permissões!');
+        }
+
+        const songInfo = await ytdl.getInfo(args[1]);
+        const song = {
+            title: songInfo.title,
+            url: songInfo.video_url
+        };
+
+        if(!serverQueue) {
+            const queueConstruct = {
+                textChannel: message.channel,
+                voiceChannel: voiceChannel,
+                connection: null,
+                songs: [],
+                volume: 5,
+                playing: true
+            };
+            queue.set(message.guild.id, queueConstruct);
+
+            queueConstruct.songs.push(song);
+
+            try {
+                var connection = await voiceChannel.join();
+                queueConstruct.connection = connection;
+                play(message.guild, queueConstruct.songs[0]);
+            } catch (error) {
+                console.error('Tive um erro! ' + error);
+                queue.delete(message.guild.id);
+                return message.reply('Eu não pude conectar ao canal, pois tive alguns erros!');
+            }
+
+        } else {
+            serverQueue.songs.push(song);
+            return message.reply(`Adicionado para a lista: **${song.title}**`);
+        }
+        return;
+    } else if (message.content.startsWith(prefix + 'pular')) {
+        if(!message.member.voiceChannel) return message.reply('Você não está em um canal de voz!');
+        if (!serverQueue) return message.reply('Não está tocando nada!');
+        serverQueue.connection.dispatcher.end();
+        return;
+
+
+
+    } else if (message.content.startsWith(prefix + 'parar')){
+        if(!message.member.voiceChannel) return message.reply('Você não está em um canal de voz!');
+        if (!serverQueue) return message.reply('Não está tocando nada!');
+        serverQueue.songs = [];
+        serverQueue.connection.dispatcher.end();
+        return;
+
+
+
+    } else if(message.content.startsWith(prefix + 'volume')) {
+        if(!serverQueue) return message.reply('Não estou tocando nada!');
+        if(!args[1]) return message.reply(`O volume atual é: **${serverQueue.volume}**`);
+        serverQueue.connection.dispatcher.setVolumeLogarithmic(args[1] / 5);
+        return message.reply(`O volume atual agora é: **${args[1]}**`);
+
+
+
+    } else if (message.content.startsWith(prefix + 'tocando')) {
+        if(!serverQueue) return message.reply('Não estou tocando nada!');
+        return message.reply(`Estou Tocando: **${serverQueue.songs[0].title}**`);
+    
+    
+    } else if (message.content.startsWith(prefix + 'lista')) {
+        if (!serverQueue) return message.reply('Eu não estou tocando nada!');
+        return message.reply(`
+==**Lista**==
+${serverQueue.songs.map(song => `**-** ${song.title}`).join('\n')}
+
+**Tocando**: ${serverQueue.songs[0].title}
+        `);
+    }
+    return;
+
+});
+
+function play(guild, song) {
+    const serverQueue = queue.get(guild.id);
+
+    if(!song) {
+        serverQueue.voiceChannel.leave();
+        queue.delete(guild.id);
+        return;
+    }
+
+    const dispatcher = serverQueue.connection.playStream(ytdl(song.url))
+        .on('end', () => {
+            console.log('Musica acabou!');
+            serverQueue.songs.shift();
+            play(guild, serverQueue.songs[0]);
+        })
+        .on('error', error => console.error(error))
+    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+
+    serverQueue.textChannel.send(`Agora Tocando: **${song.title}**`);
+
+}
+
+
 bot.on('ready', () => {
     console.log('[Aviãosito] Iniciado !');
     bot.user.setActivity('av!ajuda', {type:'LISTENING'});
 });
-bot.login(process.env.BOT_TOKEN);
+bot.login(config.token);
