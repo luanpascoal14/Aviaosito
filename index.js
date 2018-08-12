@@ -46,9 +46,8 @@ bot.on('message', async message => {
             .setDescription(`:ping_pong: **PONG!**`)
             .setColor('0x64fc00')
             .addField(`Seu ping é de aproximadamente **${Math.round(bot.ping)}ms**!`, ' ⠀')
-            .setAuthor(message.author.username, message.author.displayAvatarURL)
-            .setTimestamp()
-            message.delete()
+            .setAuthor(message.author.username, message.author.displayAvatarURL);
+            message.delete();
             message.channel.send(pingembed)
         }
     }
@@ -196,8 +195,10 @@ bot.on('message', async message => {
             if(!msgs[0]) return message.reply('Você precisa dizer o seu novo nickname!');
             let Nnick = msgs.slice(22).join(" ");
             if(message.guild.owner.id === message.author.id) return message.reply('Desculpa, Mais não posso mudar seu nickname!');
+            let Nsame = message.member.nickname;
             message.delete().catch();
             message.member.setNickname(Nnick);
+            if(Nsame === message.member.nickname) return message.reply('Desculpe, mas não posso alterar seu nickname!')
             message.reply('Agora seu novo nickname neste servidor é: **' + Nnick + '** !');
         }
     } 
@@ -211,7 +212,8 @@ bot.on('message', async message => {
             .setThumbnail(PIcon)
             .setColor(PColor)
             .setDescription('**PEDIDO**', 'Por: ' + message.author.username)
-            .addField('Horario:', message.createdAt)
+            .addField('**Servidor**: ' + message.guild.name, '**Usuario**: ' + message.author.username)
+            .addField('**Horario**:', message.createdAt)
             .addField('**Pedido:**', PMsg);
             message.delete();
             let PDono = message.guild.members.find('id', '364241967388950531');
@@ -334,8 +336,8 @@ bot.on('message', async message => {
     }
 
     if(message.content.startsWith(prefix + 'mute')){
-        if (message.member.hasPermissions('MANAGE_ROLES')) return message.channel.send('Você não tem permissão para executar este comando!')
-        if (!args[0]) return message.channel.send("Mencione o membro!")
+        if (!message.member.hasPermissions('MANAGE_ROLES')) return message.channel.send('Você não tem permissão para executar este comando!')
+        if (!msgs[0]) return message.channel.send("Mencione o membro!")
         var user = message.mentions.members.first()
         var razao = msgs.slice(1).join(' ') 
         if (!razao) razao = "sem motivo"
@@ -343,7 +345,7 @@ bot.on('message', async message => {
         if(!muteRole) return message.channel.send("Não encontrei o cargo Silenciado.");
         try {
             user.addRole(muteRole)
-            message.channel.send(user.tag +" foi mutado por"  + razao + "!");
+            message.channel.send(msgs[0] +" foi mutado por **"  + razao + "**!");
         } catch (err) { 
             message.channel.send("Eu não tenho as permissões necessárias para mutar um membro!");
         } 
@@ -436,13 +438,131 @@ bot.on('message', async message => {
     
 });
 
+const ytdl = require('ytdl-core');
+const queue = new Map();
+
+bot.on('message', async message => {
+    if(message.author.bot) return;
+    const prefix = config.prefix;
+    if(!message.content.startsWith(prefix)) return;
+    const args = message.content.split(' ');
+    const serverQueue = queue.get(message.guild.id);
+
+    if(message.content.startsWith(prefix + 'tocar')){
+        const voiceChannel = message.member.voiceChannel;
+        if(!voiceChannel) return message.reply('Você precisa estar em um canal de voz!');
+        const permissions = voiceChannel.permissionsFor(message.client.user);
+        if(!permissions.has('CONNECT')) {
+            return message.reply('Eu não pude conectar em seu canal, pois preciso ter algumas permissões!');
+        }
+        if(!permissions.has('SPEAK')) {
+            return message.reply('Eu não posso falar, pois preciso ter algumas permissões!');
+        }
+
+        const songInfo = await ytdl.getInfo(args[1]);
+        const song = {
+            title: songInfo.title,
+            url: songInfo.video_url
+        };
+
+        if(!serverQueue) {
+            const queueConstruct = {
+                textChannel: message.channel,
+                voiceChannel: voiceChannel,
+                connection: null,
+                songs: [],
+                volume: 5,
+                playing: true
+            };
+            queue.set(message.guild.id, queueConstruct);
+
+            queueConstruct.songs.push(song);
+
+            try {
+                var connection = await voiceChannel.join();
+                queueConstruct.connection = connection;
+                play(message.guild, queueConstruct.songs[0]);
+            } catch (error) {
+                console.error('Tive um erro! ' + error);
+                queue.delete(message.guild.id);
+                return message.reply('Eu não pude conectar ao canal, pois tive alguns erros!');
+            }
+
+        } else {
+            serverQueue.songs.push(song);
+            return message.reply(`Adicionado para a lista: **${song.title}**`);
+        }
+        return;
+    } else if (message.content.startsWith(prefix + 'pular')) {
+        if(!message.member.voiceChannel) return message.reply('Você não está em um canal de voz!');
+        if (!serverQueue) return message.reply('Não está tocando nada!');
+        serverQueue.connection.dispatcher.end();
+        return;
+
+
+
+    } else if (message.content.startsWith(prefix + 'parar')){
+        if(!message.member.voiceChannel) return message.reply('Você não está em um canal de voz!');
+        if (!serverQueue) return message.reply('Não está tocando nada!');
+        serverQueue.songs = [];
+        serverQueue.connection.dispatcher.end();
+        return;
+
+
+
+    } else if(message.content.startsWith(prefix + 'volume')) {
+        if(!serverQueue) return message.reply('Não estou tocando nada!');
+        if(!args[1]) return message.reply(`O volume atual é: **${serverQueue.volume}**`);
+        serverQueue.connection.dispatcher.setVolumeLogarithmic(args[1] / 5);
+        return message.reply(`O volume atual agora é: **${args[1]}**`);
+
+
+
+    } else if (message.content.startsWith(prefix + 'tocando')) {
+        if(!serverQueue) return message.reply('Não estou tocando nada!');
+        return message.reply(`Estou Tocando: **${serverQueue.songs[0].title}**`);
+    
+    
+    } else if (message.content.startsWith(prefix + 'lista')) {
+        if (!serverQueue) return message.reply('Eu não estou tocando nada!');
+        return message.reply(`
+==**Lista**==
+${serverQueue.songs.map(song => `**-** ${song.title}`).join('\n')}
+
+**Tocando**: ${serverQueue.songs[0].title}
+        `);
+    }
+    return;
+
+});
+
+function play(guild, song) {
+    const serverQueue = queue.get(guild.id);
+
+    if(!song) {
+        serverQueue.voiceChannel.leave();
+        queue.delete(guild.id);
+        return;
+    }
+
+    const dispatcher = serverQueue.connection.playStream(ytdl(song.url))
+        .on('end', () => {
+            console.log('Musica acabou!');
+            serverQueue.songs.shift();
+            play(guild, serverQueue.songs[0]);
+        })
+        .on('error', error => console.error(error))
+    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+
+    serverQueue.textChannel.send(`Agora Tocando: **${song.title}**`);
+
+}
 
 
 bot.on('ready', () => {
     console.log('[Aviãosito] Iniciado !');
     bot.user.setActivity('av!ajuda', {type:'LISTENING'});
 });
-
 
 
 bot.login(process.env.BOT_TOKEN);
