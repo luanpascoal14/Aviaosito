@@ -190,6 +190,7 @@ bot.on('message', async message => {
     }
 
 
+
     if(message.content.startsWith(prefix + 'nick')) {
         if(comando === 'nick') {
             if(!msgs[0]) return message.reply('Você precisa dizer o seu novo nickname!');
@@ -414,14 +415,14 @@ bot.on('message', async message => {
 
     if(message.content.startsWith(prefix + 'corrida')) {
         let user = message.mentions.users.first();
-          if (!user) return message.reply('**Você não mencionou o usuario que você quer correr!**').catch(console.error);
+          if (!user) return message.reply('**Você não mencionou o seu Competidor!**').catch(console.error);
           const Corrida = "<@" + message.author.id + ">" 
           const corrida2 =  " <@" + user.id + ">"
           var falas = [" fez **200** metros 🏎 ....."," fez **500** metros 🏎 ..........."," fez **800** metros 🏎 .............."," fez **1000** metros 🏎 ................."," fez **1500** metros 🏎 ............................","Explodiu 🔥 ","Bateu e pegou fogo 🔥" ]
           message.channel.send({
               "embed": {
                   "title": "🏎 Corrida",
-                  "description": " O " + Corrida + " e" +  corrida2 + " **estao disputando uma corrida**" ,
+                  "description": " O " + Corrida + " e" +  corrida2 + " **começaram uma corrida**" ,
                   "color": "65535",
                   
                   "fields": [
@@ -563,6 +564,7 @@ bot.on('ready', () => {
     console.log('[Aviãosito] Iniciado !');
     bot.user.setActivity('av!ajuda', {type:'LISTENING'});
 });
+
 
 
 bot.login(process.env.BOT_TOKEN);
