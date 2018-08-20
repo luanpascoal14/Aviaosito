@@ -2,42 +2,50 @@ const Discord = require('discord.js');
 const bot = new Discord.Client();
 const config = require('./config.json');
 
-bot.on('guildMemberRemove', member => {
-    if(member.guild.id === '437625052775710753') {
-        let canalSAI = member.guild.channels.get('452259852547522570');
-        canalSAI.send('👈 ' + member.user.username + ' que pena que você saiu :cry:');
-    }
-});
+const prefix = config.prefix;
+
 
 bot.on('guildMemberAdd', member => {
     if(member.guild.id === '437625052775710753') {
-        let canalBV = member.guild.channels.get('437662840980242432');
-        canalBV.send('Bem-Vindo, ' + member.user + ' ao grupo ŘΔƤØŞΔĆŘΔ₣Ŧ, chame seus amigos para se divertir!');
         member.send('Obrigado por entrar no **' + member.guild.name + '** ' + member.user.username + '! Chame seus amigos para sé divertir com você! https://discord.gg/26MPNnh');
     }
 });
+
+
 
 bot.on('message', async message => {
     if(message.author.bot) return;
     if(message.channel.type === 'dm') return message.reply('Eu sou apenas um Bot, então use comandos em servidores');
 
-    const prefix = config.prefix;
     const msgs = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const comando = msgs.shift().toLowerCase();
 
-    if(message.content.startsWith(prefix + 'si')) {
-        if(comando === 'si'){
-            
-            let SIcon = message.guild.iconURL;
-            
-            let SEmbed = new Discord.RichEmbed()
-            .setThumbnail(SIcon)
-            .setColor('#72a8ff')
-            .setTitle('**' + message.channel.name + '**')
-            .setDescription('Informações:', '⠀')
-            .addField('Server ID: ' + message.guild.id, 'Dono: ' + message.guild.owner.nickname)
-            .addField('Membros: ' + message.guild.memberCount, 'Canais: ' + message.guild.channels.size);
-        }
+    if(message.content.startsWith(prefix + 'serverinfo')) {
+
+        let SIicon = message.guild.iconURL;
+        let SIname = message.guild.name;
+        let SIid = message.guild.id;
+        let SIregion = message.guild.region;
+        let SIdono = message.guild.owner.nickname
+        let SIcreate = message.guild.createdAt
+        let SImembros = message.guild.memberCount;
+
+        //let Online = message.guild.members.filter(a => a.presence.status == "online").size;
+        //let Ocupado = message.guild.members.filter(a => a.presence.status == "dnd").size;
+        //let Ausente = message.guild.members.filter(a => a.presence.status == "idle").size;
+        //let Offline = message.guild.members.filter(a => a.presence.status == "offline").size;
+    
+
+        let SIEmbed = new Discord.RichEmbed()
+        .setColor('#6ba3ff')
+        .setThumbnail(SIicon)
+        .setTitle(SIname)
+        .setDescription('Server ID: ' + SIid, 'Região: ' + SIregion)
+        .addField('Dono: ' + SIdono, 'Criado em: ' + SIcreate);
+        //.addField(`Membros(${SImembros})`, `**Online:** ${Online} | **Ausente:** ${Ocupado} | **Ocupado:** ${Ausente} | **Offline:** ${Offline} `)
+        message.delete();
+        message.reply(SIEmbed)
+
     }
 
     if(message.content.startsWith(prefix + 'ping')) {
@@ -106,6 +114,61 @@ bot.on('message', async message => {
             message.author.send('Sua denuncia foi enviada com sucesso!');
         }
     }
+    if(message.content.startsWith(prefix + 'on')){
+        let Online = message.guild.members.filter(a => a.presence.status == "online").size;
+        let Ocupado = message.guild.members.filter(a => a.presence.status == "dnd").size;
+        let Ausente = message.guild.members.filter(a => a.presence.status == "idle").size;
+        let Offline = message.guild.members.filter(a => a.presence.status == "offline").size;
+    
+        let sinfoembed = new Discord.RichEmbed()
+        .addField('Membros', `**Online:** ${Online} | **Ausente:** ${Ausente} | **Ocupado:** ${Ocupado} | **Offline:** ${Offline} `) ;
+        
+        message.channel.send(sinfoembed);
+        
+    }
+
+    if(message.content.startsWith(prefix + 'status')){
+        if(!message.author.id === '364241967388950531') return message.reply('Sem permissão!')
+
+        if(!msgs[0]) return message.reply('Mencione um Status!')
+
+        if(msgs[0] === 'online', 'ausente', 'ocupado', 'offline'){
+            if(msgs[0] === 'online'){
+                bot.user.setStatus('online');
+                message.reply('Status Mudado para **Online**')
+            }
+            if(msgs[0] === 'ausente'){
+                bot.user.setStatus('idle');
+                message.reply('Status Mudado para **Ausente**')
+            }
+            if(msgs[0] === 'ocupado'){
+                bot.user.setStatus('dnd')
+                message.reply('Status Mudado para **Ocupado**')
+            }
+            if(msgs[0] === 'offline'){
+                bot.user.setStatus('invisible')
+                message.reply('Status Mudado para **Offline**')
+            }
+        }
+    }
+
+
+    if(message.content.startsWith(prefix + '8ball')){
+        if(!msgs[0]) return message.reply("Por favor, faça a pergunta completa")
+        let replies = ["Sim.", "Não.", "Eu não sei.", "talvez."]
+
+        let result = Math.floor((Math.random() * replies.length));
+        let question = msgs.join(' ');
+
+        let ballembed = new Discord.RichEmbed()
+        .setAuthor(message.author.tag)
+        .setColor('#ffe200')
+        .addField('Questão', question)
+        .addField("Resposta", replies[result])
+
+        message.channel.send(ballembed);
+    }
+
 
     if(message.content.startsWith (prefix + 'ajuda')){
         let AEmbed = new Discord.RichEmbed()
@@ -140,13 +203,15 @@ bot.on('message', async message => {
                 .setColor('#ff0000')
                 .setThumbnail(message.client.user.displayAvatarURL)
                 .setDescription('**Utilidades**', 'Comandos:')
+                .addField(prefix + "8ball", 'Comando divertido para te responder')
                 .addField(prefix + "avatar", 'Um comando para ver os avatares dos outros membros do servidor!')
                 .addField(prefix + 'botinfo', 'Minhas Informações!')
+                .addField(prefix + "corrida", 'Um comando para se divertir, vendo o que acontece em uma corrida')
                 .addField(prefix + "falar", 'Quer se divertir? e talvez até enganar outras pessoas, pensando que o bot mesmo está falando? Então use')
-                .addField(prefix + "nick", 'Mude seu Apelido no servidor!')
+                .addField(prefix + "apelido", 'Mude seu Apelido no servidor!')
                 .addField(prefix + "pedido", 'Comando, para você dar ideias para mim :)')
                 .addField(prefix + "ping", 'Veja o seu ping!')
-                .addField(prefix + "corrida", 'Um comando para se divertir, vendo o que acontece em uma corrida')
+                .addField(prefix + 'on', 'Veja quantos membros estao onlines, ausentes, ocupados e offlines')
                 .addField(prefix + "notificar", 'Apenas utilizavel em meu servidor, isso é para quando sair uma nova novidade você ficar por dentro de tudo!')
                 msg.edit(AEmbedUti);
             })
@@ -166,6 +231,8 @@ bot.on('message', async message => {
                 .addField(prefix + "votar", 'Você quer perguntar as membros se Sim ou Não')
                 .addField(prefix + 'reportar', 'Utilize para reportar membros a staff pelo seu comportamento')
                 .addField(prefix + 'limpar', 'Comando para apagar mensagens com facilidade!')
+                .addField(prefix + "setartag", 'Adiciona uma Tag a uma pessoa!')
+                .addField(prefix + "tirar", 'Retira uma tag de uma pessoa!')
                 msg.edit(AEmbedMod);
             })
             musica.on('collect', r3 => { 
@@ -191,53 +258,58 @@ bot.on('message', async message => {
 
 
 
-    if(message.content.startsWith(prefix + 'nick')) {
-        if(comando === 'nick') {
-            if(!msgs[0]) return message.reply('Você precisa dizer o seu novo nickname!');
-            let Nnick = msgs.slice(22).join(" ");
-            if(message.guild.owner.id === message.author.id) return message.reply('Desculpa, Mais não posso mudar seu nickname!');
-            let Nsame = message.member.nickname;
-            message.delete().catch();
-            message.member.setNickname(Nnick);
-            if(Nsame === message.member.nickname) return message.reply('Desculpe, mas não posso alterar seu nickname!')
-            message.reply('Agora seu novo nickname neste servidor é: **' + Nnick + '** !');
-        }
-    } 
-    if(message.content.startsWith(prefix + 'pedido')) {
-        if(comando === 'pedido'){
-            if(!msgs[0]) return message.reply('Você precisa anotar seu pedido!');
-            let PMsg = msgs.join(' ');
-            let PIcon = message.author.displayAvatarURL;
-            let PColor = message.member.displayColor;
-            let PEmbed = new Discord.RichEmbed()
-            .setThumbnail(PIcon)
-            .setColor(PColor)
-            .setDescription('**PEDIDO**', 'Por: ' + message.author.username)
-            .addField('**Servidor**: ' + message.guild.name, '**Usuario**: ' + message.author.username)
-            .addField('**Horario**:', message.createdAt)
-            .addField('**Pedido:**', PMsg);
+    if (message.content.includes("https://discord.gg/")) {
+        if (!message.member.hasPermission("ADMINISTRATOR")) {
             message.delete();
-            let PDono = message.guild.members.find('id', '364241967388950531');
-            message.author.send('**Pedido enviado para um de nossos desenvolvedores!**');
-            PDono.send(PEmbed);
+            message.reply("❌ **Você não pode divulgar aqui!**");
+        }
+
+    }
+
+    if (message.content.includes("https://discord.app/invite")) {
+        if (!message.member.hasPermission("ADMINISTRATOR")) {
+            message.delete();
+            message.reply("❌ **Você não pode divulgar aqui!**");
+        }
+
+    }
+
+    if(message.content.startsWith(prefix + 'setartag')){
+        if(!message.member.hasPermission('MANAGE_ROLES')) return message.reply('Sem permissão')
+
+        if(!msgs[0]) return message.reply('Mencione um usuario')
+        let User = message.mentions.members.first();
+
+        if(!msgs[1]) return message.reply('Coloque uma tag')
+
+        
+        if(message.content.includes('<@&')){
+            let Tag = message.mentions.roles.first();
+            User.addRole(Tag)
+            message.reply('Adicionado com sucesso a tag!')
+        }else {
+            let Role = message.guild.roles.find('name', msgs.slice(1).join(' '));
+            User.addRole(Role);
+            message.reply('Adicionado com sucesso a tag!')
         }
     }
-    if(message.content.startsWith(prefix + 'votar')) {
-        if(comando === 'votar'){
-            if(!message.member.hasPermission('MANAGE_GUILD')) return message.reply('Você precisa ter a permissão de gerenciar servidor para isso!');
-            if(!msgs[0]) return message.reply('Adicione o Conteudo!');
-            let VConteudo = msgs.join(' ');
-            let AnuncioEmbed0 = new Discord.RichEmbed()
-            .setDescription(`**Votação**`)
-            .setAuthor(`${message.author.username}`)
-            .setColor('#fffa00')
-            .addField(`**${VConteudo}**`, '====================')
-            .addField(`\:white_check_mark: Sim`, '\:negative_squared_cross_mark: Não');
-            message.channel.send(AnuncioEmbed0).then(m => {
-                m.react('✅').then(r=>{
-                    m.react('❎');
-                })
-            });
+    if(message.content.startsWith(prefix + 'tirartag')){
+        if(!message.member.hasPermission('MANAGE_ROLES')) return message.reply('Sem permissão')
+
+        if(!msgs[0]) return message.reply('Mencione um usuario')
+        let User = message.mentions.members.first();
+
+        if(!msgs[1]) return message.reply('Coloque uma tag')
+
+        
+        if(message.content.includes('<@&')){
+            let Tag = message.mentions.roles.first();
+            User.removeRole(Tag)
+            message.reply('Retirado com sucesso a tag!')
+        }else {
+            let Role = message.guild.roles.find('name', msgs.slice(1).join(' '));
+            User.removeRole(Role);
+            message.reply('Retirado com sucesso a tag!')
         }
     }
 
@@ -286,6 +358,7 @@ bot.on('message', async message => {
         var membro = message.mentions.members.first();
         if(!message.member.hasPermissions("BAN_MEMBERS")) return message.reply("você não tem permissão de usar esse comando")
         if(!membro) return message.reply("você não mencinou ninguém")
+        if(membro.highestRole > message.member.highestRole) return message.reply('Você não pode banir uma pessoa de cargo mais alto ou igual ao seu!');
         if(!membro.bannable) return message.reply("Você não pode banir essa pessoa")
         if(razao.length < 1) return message.reply("Coloque um motivo!")
         let BEmbed = new Discord.RichEmbed()
@@ -321,6 +394,7 @@ bot.on('message', async message => {
         var membro = message.mentions.members.first();
         if(!message.member.hasPermissions("KICK_MEMBERS")) return message.reply("você não tem permissão de usar esse comando")
         if(!membro) return message.reply("você não mencionou ninguém")
+        if(membro.highestRole >= message.member.highestRole) return message.reply('Você não pode banir uma pessoa de cargo mais alto ou igual ao seu!');
         if(!membro.kickable) return message.reply("Você não pode kickar essa membro")
         if(razao.length < 1) return message.reply("Coloque um motivo!")
         let KEmbed = new Discord.RichEmbed()
@@ -341,6 +415,7 @@ bot.on('message', async message => {
         if (!msgs[0]) return message.channel.send("Mencione o membro!")
         var user = message.mentions.members.first()
         var razao = msgs.slice(1).join(' ') 
+        if(user.highestRole >= message.member.highestRole) return message.reply('Você não pode banir uma pessoa de cargo mais alto ou igual ao seu!');
         if (!razao) razao = "sem motivo"
         var muteRole = message.guild.roles.find("name", "Silenciado")
         if(!muteRole) return message.channel.send("Não encontrei o cargo Silenciado.");
@@ -413,6 +488,7 @@ bot.on('message', async message => {
         }
     }
 
+
     if(message.content.startsWith(prefix + 'corrida')) {
         let user = message.mentions.users.first();
           if (!user) return message.reply('**Você não mencionou o seu Competidor!**').catch(console.error);
@@ -435,7 +511,6 @@ bot.on('message', async message => {
                 }
             })
     }
-    
     
 });
 
@@ -562,7 +637,18 @@ function play(guild, song) {
 
 bot.on('ready', () => {
     console.log('[Aviãosito] Iniciado !');
-    bot.user.setActivity('av!ajuda', {type:'LISTENING'});
+    console.log(`Logado em ${bot.guilds.size} servidores e ${bot.users.size} usuarios`)
+    bot.user.setActivity(`-ajuda | ${bot.guilds.size} servers | ${bot.users.size} usuarios`, {type:'WATCHING'});
+});
+
+bot.on('GuildCreate', () => {
+    console.log(`Entrou em um servidor`)
+    bot.user.setActivity(`-ajuda | ${bot.guilds.size} servers | ${bot.users.size} usuarios`, {type:'WATCHING'});
+});
+
+bot.on('GuildDelete', () => {
+    console.log(`Saiu de um servidor`)
+    bot.user.setActivity(`-ajuda | ${bot.guilds.size} servers | ${bot.users.size} usuarios`, {type:'WATCHING'});
 });
 
 
